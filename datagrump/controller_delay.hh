@@ -11,6 +11,11 @@ private:
   bool debug_; /* Enables debugging output */
 
   /* Add member variables here */
+  double rtt_;
+
+  unsigned int cwnd_;
+
+  void update_cwnd_();
 
 public:
   /* Public interface for the congestion controller */

@@ -11,9 +11,11 @@ private:
   bool debug_; /* Enables debugging output */
 
   /* Add member variables here */
-  unsigned int window_size_;
-  unsigned int fraction_of_window_size_;
-  uint64_t timestamp_of_mult_decrease_;
+  double rtt_;
+
+  unsigned int cwnd_;
+
+  void update_cwnd_();
 
 public:
   /* Public interface for the congestion controller */
@@ -39,10 +41,6 @@ public:
   /* How long to wait (in milliseconds) if there are no acks
      before sending one more datagram */
   unsigned int timeout_ms( void );
-
-  void multiplicative_decrease();
-
-  void additive_increase();
 };
 
 #endif

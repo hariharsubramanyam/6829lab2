@@ -10,4 +10,7 @@ elif [ "$1" = "b" ]; then
   cp controller_aimd.hh controller.hh
 elif [ "$1" = "c" ]; then
   echo "Using threshold"
+  cp sender_delay.cc sender.cc
+  cp controller_delay.cc controller.cc 
+  cp controller_delay.hh controller.hh
 fi
