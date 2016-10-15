@@ -13,7 +13,7 @@ private:
   /* Add member variables here */
   double rtt_;
 
-  unsigned int cwnd_;
+  double cwnd_;
 
   void update_cwnd_();
 

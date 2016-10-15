@@ -4,7 +4,7 @@
 #include "timestamp.hh"
 
 #define RTT_ALPHA 0.2
-#define MIN_CWND 1
+#define MIN_CWND 1.0
 
 using namespace std;
 
@@ -17,7 +17,7 @@ Controller::Controller( const bool debug )
 unsigned int Controller::window_size( void )
 {
   /* Default: fixed window size of 100 outstanding datagrams */
-  unsigned int the_window_size = cwnd_;
+  unsigned int the_window_size = (unsigned int) cwnd_;
 
   if ( debug_ ) {
     cerr << "At time " << timestamp_ms()
@@ -43,18 +43,17 @@ void Controller::datagram_was_sent( const uint64_t sequence_number,
 
 void Controller::update_cwnd_() {
   if (rtt_ > 200) {
-    cwnd_ = 5;
+    cwnd_ -= 10.0/cwnd_;
   } else if (rtt_ > 150) {
-    cwnd_ = 10;
-  } else if (rtt_ > 100) {
-    cwnd_ = 15;
+    cwnd_ -= 8.0/cwnd_;
   } else if (rtt_ > 75) {
-    cwnd_ = 20;
+    cwnd_ += 0.3/cwnd_;
   } else if (rtt_ > 40) {
-    cwnd_ = 25;
+    cwnd_ += 0.5/cwnd_;
   } else {
-    cwnd_ =  35;
+    cwnd_ += 0.8/cwnd_;
   }
+  cwnd_ = max(cwnd_, MIN_CWND);
 }
 
 /* An ack was received */
