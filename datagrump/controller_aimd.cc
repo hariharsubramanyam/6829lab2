@@ -7,7 +7,7 @@
 #define AI_CONST 1
 #define MD_CONST 2
 #define MIN_WINDOW 1
-#define MD_BUFFER_TIME 1000
+#define MD_BUFFER_TIME 500
 
 using namespace std;
 
@@ -35,7 +35,6 @@ void Controller::additive_increase() {
     window_size_++;
     fraction_of_window_size_ -= window_size_;
   }
-  cerr << "Doing additive increase " << window_size_ << endl;
 }
 
 void Controller::multiplicative_decrease() {
@@ -50,7 +49,6 @@ void Controller::multiplicative_decrease() {
       (unsigned int) MIN_WINDOW, 
       (unsigned int) (window_size_ /  MD_CONST)
   );
-  cerr << "Doing multiplicative decrease " << window_size_ << endl;
 }
 
 /* A datagram was sent */

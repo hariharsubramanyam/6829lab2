@@ -3,7 +3,7 @@
 #include "controller.hh"
 #include "timestamp.hh"
 
-#define RTT_ALPHA 0.2
+#define RTT_ALPHA 0.1
 #define MIN_CWND 1.0
 
 using namespace std;
