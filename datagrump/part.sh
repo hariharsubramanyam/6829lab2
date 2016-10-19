@@ -9,8 +9,13 @@ elif [ "$1" = "b" ]; then
   cp controller_aimd.cc controller.cc 
   cp controller_aimd.hh controller.hh
 elif [ "$1" = "c" ]; then
-  echo "Using threshold"
+  echo "Using delay-triggered"
   cp sender_delay.cc sender.cc
   cp controller_delay.cc controller.cc 
   cp controller_delay.hh controller.hh
+elif [ "$1" = "d1" ]; then
+  echo "Using PID"
+  cp sender_pid.cc sender.cc
+  cp controller_pid.cc controller.cc 
+  cp controller_pid.hh controller.hh
 fi

@@ -15,7 +15,7 @@ private:
 
   double cwnd_;
 
-  void update_cwnd_();
+  uint64_t timestamp_of_last_md_;
 
 public:
   /* Public interface for the congestion controller */

@@ -12,10 +12,12 @@ private:
 
   /* Add member variables here */
   double rtt_;
-
   double cwnd_;
+  uint64_t time_of_last_update_;
+  double last_error_;
+  double sum_error_;
 
-  uint64_t timestamp_of_last_md_;
+  void control_update_();
 
 public:
   /* Public interface for the congestion controller */

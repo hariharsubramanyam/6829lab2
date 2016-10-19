@@ -5,12 +5,17 @@
 
 #define RTT_ALPHA 0.1
 #define MIN_CWND 1.0
+#define THRESHOLD 110
+#define MD_CONST 0.5
+#define AI_CONST 1
+#define MD_BUFFER_TIME 500
 
 using namespace std;
 
 /* Default constructor */
 Controller::Controller( const bool debug )
-  : debug_( debug ), rtt_( -1 ), cwnd_( MIN_CWND )
+  : debug_( debug ), rtt_( -1 ), cwnd_( MIN_CWND ),
+    timestamp_of_last_md_ ( timestamp_ms() )
 {}
 
 /* Get current window size, in datagrams */
@@ -41,21 +46,6 @@ void Controller::datagram_was_sent( const uint64_t sequence_number,
   }
 }
 
-void Controller::update_cwnd_() {
-  if (rtt_ > 200) {
-    cwnd_ -= 10.0/cwnd_;
-  } else if (rtt_ > 150) {
-    cwnd_ -= 8.0/cwnd_;
-  } else if (rtt_ > 75) {
-    cwnd_ += 0.3/cwnd_;
-  } else if (rtt_ > 40) {
-    cwnd_ += 0.5/cwnd_;
-  } else {
-    cwnd_ += 0.8/cwnd_;
-  }
-  cwnd_ = max(cwnd_, MIN_CWND);
-}
-
 /* An ack was received */
 void Controller::ack_received( const uint64_t sequence_number_acked,
 			       /* what sequence number was acknowledged */
@@ -73,9 +63,13 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   } else {
     rtt_ = RTT_ALPHA * curr_rtt + (1 - RTT_ALPHA) * rtt_;
   }
-  update_cwnd_();
-
-  cerr << "RTT " << rtt_ << " and cwnd: " << cwnd_ << endl;
+  if (rtt_ <= THRESHOLD) {
+    cwnd_ += AI_CONST / cwnd_;
+  } else if (timestamp_ms() - timestamp_of_last_md_ >= MD_BUFFER_TIME) {
+    timestamp_of_last_md_ = timestamp_ms();
+    cwnd_ *= MD_CONST;
+    cwnd_ = max(cwnd_, MIN_CWND);
+  }
 
   if ( debug_ ) {
     cerr << "At time " << timestamp_ack_received
