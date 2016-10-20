@@ -13,9 +13,9 @@ elif [ "$1" = "c" ]; then
   cp sender_delay.cc sender.cc
   cp controller_delay.cc controller.cc 
   cp controller_delay.hh controller.hh
-elif [ "$1" = "d1" ]; then
-  echo "Using PID"
-  cp sender_pid.cc sender.cc
-  cp controller_pid.cc controller.cc 
-  cp controller_pid.hh controller.hh
+elif [ "$1" = "d" ]; then
+  echo "Using Q-learning"
+  cp sender_ql.cc sender.cc
+  cp controller_ql.cc controller.cc 
+  cp controller_ql.hh controller.hh
 fi
