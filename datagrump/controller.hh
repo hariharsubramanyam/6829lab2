@@ -2,8 +2,106 @@
 #define CONTROLLER_HH
 
 #include <cstdint>
+#include <vector>
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <deque>
 
 /* Congestion controller interface */
+class QLearning {
+private:
+  size_t num_states_;
+  size_t num_actions_;
+  double alpha_;
+  double epsilon_;
+  double gamma_;
+  bool verbose_;
+  // Given state s and action a, table_[s][a] is the reward attained 
+  // by taking action a in state s.
+  std::vector<std::vector<double> > table_;
+public:
+  QLearning(size_t num_states,
+            size_t num_actions,
+            double alpha,
+            double epsilon,
+            double gamma,
+            bool verbose) :
+    num_states_(num_states), num_actions_(num_actions), alpha_(alpha), 
+    epsilon_(epsilon), gamma_(gamma), verbose_(verbose), table_() {
+      srand((unsigned)time(NULL));
+      for (size_t i = 0; i < num_states; i++) {
+        table_.push_back(std::vector<double>(num_actions));
+        for (size_t j = 0; j < num_actions; j++) {
+          table_[i][j] = 0;
+        }
+      }
+  }
+  
+  size_t act_greedily(size_t state) {
+    size_t best_action = 0;
+    double best_value = table_[state][0];
+    for (size_t action = 1; action < num_actions_; action++) {
+      if (table_[state][action] > best_value) {
+        best_action = action;
+        best_value = table_[state][action];
+      }
+    }
+    if (verbose_) {
+      std::cout << "Taking greedy action " << best_action << " with value " << best_value << std::endl;
+    }
+    return best_action;
+  }
+  
+  size_t act_eps_greedily(size_t state) {
+    float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    if (r < epsilon_) {
+      // If we behave non-greedily, sample an action.
+      size_t action = rand() % num_actions_;
+      if (verbose_) {
+        std::cout << "Taking random action " << action << std::endl;
+      }
+      return action;
+    } else {
+      // Otherwise, pick the optimal action.
+      return act_greedily(state);
+    }
+  }
+  
+  void update_with_reward(size_t state, size_t action, size_t next_state, double reward) {
+    double old_value = table_[state][action];
+    table_[state][action] += alpha_ * (reward + gamma_ * table_[next_state][act_greedily(next_state)] - table_[state][action]);
+    if (verbose_) {
+      std::cout << "Updating value from " << old_value << " to " << table_[state][action] << std::endl;
+    }
+  }
+};
+
+class FixedQueue {
+private:
+  size_t size_;
+  std::deque<int> deque_;
+public:
+  FixedQueue(size_t size) : size_(size), deque_() {}
+  void add(double val) {
+    if (deque_.size() == size_) {
+      deque_.pop_front();
+    }
+    deque_.push_back(val);
+  }
+  
+  size_t to_state(int base) {
+    size_t result = 0;
+    size_t power = 0;
+    for (std::deque<int>::const_iterator i = deque_.cbegin();
+          i != deque_.cend(); i++) {
+      result += (*i) * std::pow(base, power);
+      power++;
+    }
+    return result;
+  }
+};
 
 class Ewma {
 private:
@@ -35,6 +133,10 @@ private:
   Ewma throughput_;
   uint64_t num_packets_in_epoch_;
   uint64_t start_of_last_epoch_;
+  int last_state_;
+  int last_action_;
+  uint64_t cwnd_;
+  QLearning q_;
 
 public:
   /* Public interface for the congestion controller */
