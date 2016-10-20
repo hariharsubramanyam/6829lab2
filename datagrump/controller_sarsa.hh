@@ -10,7 +10,7 @@
 #include <deque>
 
 /* Congestion controller interface */
-class QLearning {
+class Sarsa {
 private:
   size_t num_states_;
   size_t num_actions_;
@@ -22,7 +22,7 @@ private:
   // by taking action a in state s.
   std::vector<std::vector<double> > table_;
 public:
-  QLearning(size_t num_states,
+  Sarsa(size_t num_states,
             size_t num_actions,
             double alpha,
             double epsilon,
@@ -38,7 +38,14 @@ public:
         }
       }
   }
-  
+
+  void prefer_action(size_t state, size_t action, double value) {
+    for (size_t act = 0; act < num_actions_; act++) {
+      table_[state][act] = 0;
+    }
+    table_[state][action] = value;
+  }
+
   size_t act_greedily(size_t state) {
     size_t best_action = 0;
     double best_value = table_[state][0];
@@ -71,7 +78,7 @@ public:
   
   void update_with_reward(size_t state, size_t action, size_t next_state, double reward) {
     double old_value = table_[state][action];
-    table_[state][action] += alpha_ * (reward + gamma_ * table_[next_state][act_greedily(next_state)] - table_[state][action]);
+    table_[state][action] += alpha_ * (reward + gamma_ * table_[next_state][act_eps_greedily(next_state)] - table_[state][action]);
     if (verbose_) {
       std::cout << "Updating value from " << old_value << " to " << table_[state][action] << std::endl;
     }
@@ -136,7 +143,7 @@ private:
   int last_state_;
   int last_action_;
   uint64_t cwnd_;
-  QLearning q_;
+  Sarsa q_;
 
 public:
   /* Public interface for the congestion controller */
