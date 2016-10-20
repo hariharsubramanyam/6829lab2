@@ -142,8 +142,10 @@ private:
   uint64_t start_of_last_epoch_;
   int last_state_;
   int last_action_;
-  uint64_t cwnd_;
+  double cwnd_;
   Sarsa q_;
+
+  void act(int action);
 
 public:
   /* Public interface for the congestion controller */

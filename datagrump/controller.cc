@@ -14,12 +14,14 @@
 #define HIGH 3
 #define VERY_HIGH 4
 
+#define NUM_ACTIONS 9
+
 using namespace std;
 
 int discretize_throughput(double throughput) {
-  if (throughput < 2) {
+  if (throughput < 3) {
     return LOW;
-  } else if (throughput < 4) {
+  } else if (throughput < 5) {
     return MED;
   } else {
     return HIGH;
@@ -27,7 +29,7 @@ int discretize_throughput(double throughput) {
 }
 
 int discretize_delay(double delay) {
-  if (delay < 130) {
+  if (delay < 80) {
     return LOW;
   } else if (delay < 200) {
     return MED;
@@ -58,32 +60,6 @@ int state_for_discretized_pair(int tp, int delay) {
   }
 }
 
-int cwnd_for_action(int action) {
-  if (action == 0) {
-    return 1;
-  } else if (action == 1) {
-    return 3;
-  } else if (action == 2) {
-    return 7;
-  } else if (action == 3) {
-    return 10;
-  } else if (action == 4) {
-    return 12;
-  } else if (action == 5) {
-    return 15;
-  } else if (action == 6) {
-    return 20;
-  } else if (action == 7) {
-    return 25;
-  } else if (action == 8) {
-    return 30;
-  } else if (action == 9) {
-    return 35;
-  } else {
-    return 40;
-  }
-}
-
 double compute_score(double throughput, double delay) {
   int d_throughput = discretize_throughput(throughput);
   int d_delay = discretize_delay(delay);
@@ -92,14 +68,21 @@ double compute_score(double throughput, double delay) {
   } else if (d_throughput == MED && d_delay == HIGH) {
     return 1;
   } else if (d_throughput == HIGH && d_delay == HIGH) {
-    return 2;
+    return 3;
   } else if (d_throughput == LOW && d_delay == LOW) {
     return 5;
   } else if (d_throughput == MED && d_delay == LOW) {
     return 20;
   } else {
-    return 50; 
+    return 30; 
   }
+}
+
+
+void Controller::act(int action) {
+  double relative = 1.0 * action / NUM_ACTIONS;
+  cwnd_ = 30 * relative;
+  cwnd_ = std::max(1.0, cwnd_);
 }
 
 /* Default constructor */
@@ -112,14 +95,20 @@ Controller::Controller( const bool debug ) :
   last_state_(-1),
   last_action_(-1),
   cwnd_(1),
-  q_(9, 11, 0.4, 0.2, 0.9, false)
+  q_(9, NUM_ACTIONS, 0.4, 0.05, 0.9, true)
 {
   rtt_.set_alpha(RTT_EWMA);
   throughput_.set_alpha(THROUGHPUT_EWMA);
-  double greedy_value = 10;
-  q_.prefer_action(state_for_discretized_pair(LOW, LOW), 8, greedy_value);
-  q_.prefer_action(state_for_discretized_pair(LOW, HIGH), 4, greedy_value);
-  q_.prefer_action(state_for_discretized_pair(HIGH, HIGH), 5, greedy_value);
+  double greedy_value = 900;
+  q_.prefer_action(state_for_discretized_pair(LOW, LOW), 7, greedy_value);
+  q_.prefer_action(state_for_discretized_pair(LOW, MED), 4, greedy_value);
+  q_.prefer_action(state_for_discretized_pair(LOW, HIGH), 2, greedy_value);
+  q_.prefer_action(state_for_discretized_pair(MED, LOW), 6, greedy_value);
+  q_.prefer_action(state_for_discretized_pair(MED, MED), 4, greedy_value);
+  q_.prefer_action(state_for_discretized_pair(MED, HIGH), 1, greedy_value);
+  q_.prefer_action(state_for_discretized_pair(HIGH, LOW), 3, greedy_value);
+  q_.prefer_action(state_for_discretized_pair(HIGH, MED), 2, greedy_value);
+  q_.prefer_action(state_for_discretized_pair(HIGH, HIGH), 9, greedy_value);
 }
 
 /* Get current window size, in datagrams */
@@ -194,13 +183,13 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       q_.update_with_reward(last_state_, last_action_, state, score);
     }
     int action = q_.act_eps_greedily(state);
-    cwnd_ = cwnd_for_action(action);
+    act(action);
+    cerr << "tp " << throughput_.get() << " and delay " << rtt_.get() / 2 << endl;
+    cerr << last_state_ << " => " << state << " "
+      << last_action_ << " => " << action << " "
+      << "rew=" << score << " and cwnd=" << cwnd_ << endl;
     last_state_ = state;
     last_action_ = action;
-    cerr << "tp " << throughput_.get() << " and delay " << rtt_.get() / 2 << endl;
-    cerr << "Came from " << last_state_ << " and " << last_action_
-      << " to " << state << " and " << action
-      << " with reward " << score << " and cwnd " << cwnd_ << endl;
   }
 
   if ( debug_ ) {
