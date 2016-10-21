@@ -23,7 +23,8 @@ Controller::Controller( const bool debug ) :
   start_of_last_epoch_(timestamp_ms()),
   cwnd_(MIN_WINDOW),
   timestamp_of_mult_decrease_(timestamp_ms()),
-  ai_(AI_CONST)
+  ai_(AI_CONST),
+  send_time_for_packet_()
 {
   rtt_.set_alpha(RTT_EWMA);
   throughput_.set_alpha(THROUGHPUT_EWMA);
@@ -89,7 +90,10 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
                                /* when the ack was received (by sender) */
 {
   // If the RTT is too high, cut the congestion window aggressively.
-  double ratio = (1.0 * timestamp_ack_received - send_timestamp_acked) / rtt_.get();
+  double ratio = 0;
+  if (rtt_.get() > 0) {
+    ratio = (1.0 * timestamp_ack_received - send_timestamp_acked) / rtt_.get();
+  }
   if (ratio > 2) {
     multiplicative_decrease(ratio * MD_CONST);
     if (ratio > 4) {
@@ -99,7 +103,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   }
 
   // Update RTT estimate.
-  if (ratio > 4) {
+  if (ratio < 4) {
     rtt_.update(timestamp_ack_received - send_timestamp_acked);
   }
   if (timestamp_ack_received - send_timestamp_acked < timeout_ms()) {

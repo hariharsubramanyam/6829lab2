@@ -8,6 +8,7 @@
 #include <ctime>
 #include <cmath>
 #include <deque>
+#include <unordered_map>
 
 /* Congestion controller interface */
 class Ewma {
@@ -43,6 +44,7 @@ private:
   double cwnd_;
   uint64_t timestamp_of_mult_decrease_;
   double ai_;
+  std::unordered_map<uint64_t, uint64_t> send_time_for_packet_;
 public:
   /* Public interface for the congestion controller */
   /* You can change these if you prefer, but will need to change
