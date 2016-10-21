@@ -83,16 +83,20 @@ void Controller::multiplicative_decrease() {
 void Controller::purge_outstanding_packets() {
   size_t num_outstanding = 0;
   uint64_t now = timestamp_ms();
+  double ratio;
+  double max_ratio = 1;
   std::vector<uint64_t> outstanding_packets;
   for (auto &entry : send_time_for_packet_) {
     if (now - entry.second > timeout_ms()) {
+      ratio = ((double)(now - entry.second)) /  timeout_ms() * 1.5;
       outstanding_packets.push_back(entry.first);
+      max_ratio = std::max(max_ratio, ratio);
       num_outstanding++;
     }
   }
 
   if (num_outstanding != 0) {
-    multiplicative_decrease();
+    multiplicative_decrease(max_ratio);
   }  
 
   for (auto seq : outstanding_packets) {
@@ -112,16 +116,14 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 {
   double rtt = timestamp_ack_received - send_timestamp_acked;
   double ratio = 1;
-  if (rtt_.get() != 0) {
-    ratio = rtt / rtt_.get();
-  }
+  ratio = std::max(ratio, rtt / timeout_ms()) * 1.5;
 
   if (send_time_for_packet_.find(sequence_number_acked) != 
       send_time_for_packet_.end()) {
     if (rtt < timeout_ms()) {
       additive_increase();
     } else {
-      multiplicative_decrease(std::max(2.0, ratio));
+      multiplicative_decrease(ratio);
     }
   } 
 
