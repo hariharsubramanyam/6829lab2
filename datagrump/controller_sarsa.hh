@@ -138,6 +138,7 @@ private:
   /* Add member variables here */
   Ewma rtt_;
   Ewma throughput_;
+  Ewma score_;
   uint64_t num_packets_in_epoch_;
   uint64_t start_of_last_epoch_;
   int last_state_;
@@ -146,6 +147,7 @@ private:
   Sarsa q_;
 
   void act(int action);
+  double compute_score(double throughput, double delay);
 
 public:
   /* Public interface for the congestion controller */

@@ -6,6 +6,7 @@
 #define EPOCH 100
 #define THROUGHPUT_EWMA 0.7
 #define RTT_EWMA 0.1
+#define SCORE_EWMA 0.4
 #define TIMEOUT 100
 
 #define VERY_LOW 0
@@ -19,9 +20,9 @@
 using namespace std;
 
 int discretize_throughput(double throughput) {
-  if (throughput < 2) {
+  if (throughput < 3) {
     return LOW;
-  } else if (throughput < 3.5) {
+  } else if (throughput < 5) {
     return MED;
   } else {
     return HIGH;
@@ -29,9 +30,9 @@ int discretize_throughput(double throughput) {
 }
 
 int discretize_delay(double delay) {
-  if (delay < 40) {
+  if (delay < 100) {
     return LOW;
-  } else if (delay < 150) {
+  } else if (delay < 200) {
     return MED;
   } else {
     return HIGH;
@@ -60,28 +61,31 @@ int state_for_discretized_pair(int tp, int delay) {
   }
 }
 
-double compute_score(double throughput, double delay) {
+double Controller::compute_score(double throughput, double delay) {
   int d_throughput = discretize_throughput(throughput);
   int d_delay = discretize_delay(delay);
+  double score = 0;
   if (d_throughput == LOW && d_delay == HIGH) {
-    return 0;
+    score = 0;
   } else if (d_throughput == MED && d_delay == HIGH) {
-    return 1;
+    score = 1;
   } else if (d_throughput == HIGH && d_delay == HIGH) {
-    return 3;
+    score = 3;
   } else if (d_throughput == LOW && d_delay == LOW) {
-    return 5;
+    score = 5;
   } else if (d_throughput == MED && d_delay == LOW) {
-    return 20;
+    score = 20;
   } else {
-    return 30; 
+    score = 30; 
   }
+  score_.update(score);
+  return score_.get();
 }
 
 
 void Controller::act(int action) {
   double relative = 1.0 * action / NUM_ACTIONS;
-  cwnd_ = 30 * relative;
+  cwnd_ = 40 * relative;
   cwnd_ = std::max(1.0, cwnd_);
 }
 
@@ -90,6 +94,7 @@ Controller::Controller( const bool debug ) :
   debug_(debug),
   rtt_(),
   throughput_(),
+  score_(),
   num_packets_in_epoch_(0),
   start_of_last_epoch_(timestamp_ms()),
   last_state_(-1),
@@ -99,6 +104,7 @@ Controller::Controller( const bool debug ) :
 {
   rtt_.set_alpha(RTT_EWMA);
   throughput_.set_alpha(THROUGHPUT_EWMA);
+  score_.set_alpha(SCORE_EWMA);
   double greedy_value = 900;
   q_.prefer_action(state_for_discretized_pair(LOW, LOW), 7, greedy_value);
   q_.prefer_action(state_for_discretized_pair(LOW, MED), 4, greedy_value);
