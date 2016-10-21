@@ -6,7 +6,7 @@
 #define EPOCH 100
 #define THROUGHPUT_EWMA 0.7
 #define RTT_EWMA 0.3
-#define TIMEOUT 100
+#define TIMEOUT 90
 #define AI_CONST 1.0
 #define MD_CONST 2
 #define MIN_WINDOW 1
@@ -60,7 +60,7 @@ void Controller::datagram_was_sent( const uint64_t sequence_number,
 }
 
 void Controller::additive_increase() {
-  ai_ += 0.001;
+  ai_ += 0.01;
   cwnd_ += (1.0 * ai_) / cwnd_;
 }
 
