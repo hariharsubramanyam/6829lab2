@@ -51,6 +51,7 @@ void Controller::datagram_was_sent( const uint64_t sequence_number,
                                     /* in milliseconds */
 {
   /* Default: take no action */
+  send_time_for_packet_[sequence_number] = send_timestamp;
 
   if ( debug_ ) {
     cerr << "At time " << send_timestamp
@@ -89,7 +90,50 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 			       const uint64_t timestamp_ack_received )
                                /* when the ack was received (by sender) */
 {
-  // If the RTT is too high, cut the congestion window aggressively.
+  // Scan the outstanding packets and count how many are above the timeout.
+  size_t num_outstanding = 0;
+  double max_outstanding_time = 0;
+  uint64_t now = timestamp_ms();
+
+  for (auto &entry : send_time_for_packet_) {
+    if (now - entry.second > timeout_ms()) {
+      num_outstanding++;
+      max_outstanding_time = std::max(
+          (double) (timestamp_ack_received - send_timestamp_acked),
+          max_outstanding_time
+      );
+    }
+  }
+
+  double ratio = 1;
+  if (rtt_.get() != 0) {
+    ratio = max_outstanding_time / rtt_.get();
+  }
+
+  bool added = false;
+  if (num_outstanding == 0) {
+    additive_increase();
+    added = true;
+  }  else {
+    multiplicative_decrease(std::max(ratio, 2.0));
+  }
+
+  if (send_time_for_packet_.find(sequence_number_acked) == 
+      send_time_for_packet_.end()) {
+    if (timestamp_ack_received - send_timestamp_acked) {
+      if (!added) {
+        additive_increase();
+      }
+    } else {
+      multiplicative_decrease();
+    }
+  } 
+
+  send_time_for_packet_.erase(sequence_number_acked);
+
+  rtt_.update(timestamp_ack_received - send_timestamp_acked);
+
+  /*
   double ratio = 0;
   if (rtt_.get() > 0) {
     ratio = (1.0 * timestamp_ack_received - send_timestamp_acked) / rtt_.get();
@@ -130,6 +174,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
     start_of_last_epoch_ = now;
     num_packets_in_epoch_ = 0;
   }
+  */
 
   if ( debug_ ) {
     cerr << "At time " << timestamp_ack_received
