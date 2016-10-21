@@ -70,6 +70,8 @@ public:
      before sending one more datagram */
   unsigned int timeout_ms( void );
 
+  void purge_outstanding_packets();
+
   void multiplicative_decrease();
   void multiplicative_decrease(double md_const);
 

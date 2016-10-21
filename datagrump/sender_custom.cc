@@ -144,6 +144,7 @@ int DatagrumpSender::loop( void )
   /* Run these two rules forever */
   while ( true ) {
     const auto ret = poller.poll( controller_.timeout_ms() );
+    controller_.purge_outstanding_packets();
     if ( ret.result == PollResult::Exit ) {
       return ret.exit_status;
     } else if ( ret.result == PollResult::Timeout ) {
