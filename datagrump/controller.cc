@@ -12,6 +12,7 @@
 #define MIN_WINDOW 1
 #define MD_BUFFER_TIME 200
 #define MD_RATIO_SCALER 1.5
+#define START_WINDOW 5
 
 using namespace std;
 
@@ -22,7 +23,7 @@ Controller::Controller( const bool debug ) :
   throughput_(),
   num_packets_in_epoch_(0),
   start_of_last_epoch_(timestamp_ms()),
-  cwnd_(MIN_WINDOW),
+  cwnd_(START_WINDOW),
   timestamp_of_mult_decrease_(timestamp_ms()),
   ai_(AI_CONST),
   send_time_for_packet_()
@@ -74,7 +75,7 @@ void Controller::multiplicative_decrease(double md_const) {
 
   timestamp_of_mult_decrease_ = timestamp_ms();
   cwnd_ = max((double)MIN_WINDOW, cwnd_ /  md_const);
-  cerr << "Cutting window by ratio " << md_const << " to " <<  cwnd_ << endl;
+  //cerr << "Cutting window by ratio " << md_const << " to " <<  cwnd_ << endl;
 }
 
 void Controller::multiplicative_decrease() {
