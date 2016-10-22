@@ -11,6 +11,7 @@
 #define MD_CONST 2
 #define MIN_WINDOW 1
 #define MD_BUFFER_TIME 200
+#define MD_RATIO_SCALER 1.5
 
 using namespace std;
 
@@ -88,7 +89,7 @@ void Controller::purge_outstanding_packets() {
   std::vector<uint64_t> outstanding_packets;
   for (auto &entry : send_time_for_packet_) {
     if (now - entry.second > timeout_ms()) {
-      ratio = ((double)(now - entry.second)) /  timeout_ms() * 1.5;
+      ratio = ((double)(now - entry.second)) /  timeout_ms() * MD_RATIO_SCALER;
       outstanding_packets.push_back(entry.first);
       max_ratio = std::max(max_ratio, ratio);
       num_outstanding++;
