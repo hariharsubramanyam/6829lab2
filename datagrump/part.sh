@@ -1,8 +1,8 @@
 if [ "$1" = "a" ]; then
-  echo "Using original code"
-  cp sender_original.cc sender.cc
-  cp controller_original.cc controller.cc 
-  cp controller_original.hh controller.hh
+  echo "Using fixed_window"
+  cp sender_fixed_window.cc sender.cc
+  cp controller_fixed_window.cc controller.cc 
+  cp controller_fixed_window.hh controller.hh
 elif [ "$1" = "b" ]; then
   echo "Using AIMD"
   cp sender_aimd.cc sender.cc
