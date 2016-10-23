@@ -15,6 +15,11 @@ My Warmup Exercise A code is in
 
 You can make the above files replace the existing `sender.cc`, `controller.cc`, and `controller.cc` by running `./part.sh a` (make sure that `./part.sh` is executable).
 
+The performance of this code is roughly:
+* **Throughput**: 2.26 Mbits/s
+* **95th Percentile Queuing Delay**: 64 ms
+* **95th Percentile Signal Delay**: 176 ms
+
 ## Warmup Exercise B
 My Warmup Exercise B code is in
 * [`sender_aimd.cc`](https://github.com/hariharsubramanyam/6829lab2/blob/master/datagrump/sender_aimd.cc)
@@ -22,6 +27,11 @@ My Warmup Exercise B code is in
 * [`controller_aimd.hh`](https://github.com/hariharsubramanyam/6829lab2/blob/master/datagrump/controller_aimd.hh)
 
 Run `./part.sh b`
+
+The performance of this code is roughly:
+* **Throughput**: 3.03 Mbits/s
+* **95th Percentile Queuing Delay**: 54 ms
+* **95th Percentile Signal Delay**: 108 ms
 
 ## Warmup Exercise C
 My Warmup Exercise C code is in
@@ -31,6 +41,11 @@ My Warmup Exercise C code is in
 
 Run `./part.sh c`
 
+The performance of this code is roughly:
+* **Throughput**: 4.08 Mbits/s
+* **95th Percentile Queuing Delay**: 73 ms
+* **95th Percentile Signal Delay**: 154 ms
+
 ## Exercise D
 My Exercise D code is in
 * [`sender_custom.cc`](https://github.com/hariharsubramanyam/6829lab2/blob/master/datagrump/sender_custom.cc)
@@ -39,6 +54,11 @@ My Exercise D code is in
 
 Run `./part.sh d`
 
+The performance of this code is roughly:
+* **Throughput**: 3.82 Mbits/s
+* **95th Percentile Queuing Delay**: 59 ms
+* **95th Percentile Signal Delay**: 101 ms
+
 ## Exercise D': Reinforcement Learning (did not work, but included for reference)
 I tried another approach to solve Exercise D (I call my extension Exercise D', or "D prime"). While it did not perform as well as my solution to Exercise D, I have included it in this code because the reader may find it interesting. Its code is in
 * [`sender_sarsa.cc`](https://github.com/hariharsubramanyam/6829lab2/blob/master/datagrump/sender_sarsa.cc)
@@ -46,3 +66,8 @@ I tried another approach to solve Exercise D (I call my extension Exercise D', o
 * [`controller_sarsa.hh`](https://github.com/hariharsubramanyam/6829lab2/blob/master/datagrump/controller_sarsa.hh)
 
 Run `./part.sh dprime`
+
+The performance of this code is roughly:
+* **Throughput**: 1.52 Mbits/s
+* **95th Percentile Queuing Delay**: 59 ms
+* **95th Percentile Signal Delay**: 120 ms
