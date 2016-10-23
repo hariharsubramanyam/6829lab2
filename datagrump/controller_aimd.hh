@@ -11,9 +11,7 @@ private:
   bool debug_; /* Enables debugging output */
 
   /* Add member variables here */
-  unsigned int window_size_;
-  unsigned int fraction_of_window_size_;
-  uint64_t timestamp_of_mult_decrease_;
+  double cwnd_;
 
 public:
   /* Public interface for the congestion controller */

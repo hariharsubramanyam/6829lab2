@@ -14,13 +14,13 @@ elif [ "$1" = "c" ]; then
   cp controller_delay.cc controller.cc 
   cp controller_delay.hh controller.hh
 elif [ "$1" = "d" ]; then
-  echo "Using Q-learning"
-  cp sender_sarsa.cc sender.cc
-  cp controller_sarsa.cc controller.cc 
-  cp controller_sarsa.hh controller.hh
-elif [ "$1" = "e" ]; then
   echo "Using ad-hoc"
   cp sender_custom.cc sender.cc
   cp controller_custom.cc controller.cc 
   cp controller_custom.hh controller.hh
+elif [ "$1" = "dprime" ]; then
+  echo "Using Sarsa"
+  cp sender_sarsa.cc sender.cc
+  cp controller_sarsa.cc controller.cc 
+  cp controller_sarsa.hh controller.hh
 fi

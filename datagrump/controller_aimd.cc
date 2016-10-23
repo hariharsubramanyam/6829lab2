@@ -4,51 +4,35 @@
 #include "timestamp.hh"
 
 #define TIMEOUT 100
-#define AI_CONST 1
-#define MD_CONST 2
-#define MIN_WINDOW 1
-#define MD_BUFFER_TIME 500
+#define AI_CONST 1.5
+#define MD_CONST 0.8
+#define MIN_WINDOW 1.0
 
 using namespace std;
 
 /* Default constructor */
 Controller::Controller( const bool debug )
-  : debug_( debug ), window_size_( MIN_WINDOW ), fraction_of_window_size_( 0 ), 
-    timestamp_of_mult_decrease_ ( timestamp_ms() )
+  : debug_( debug ), cwnd_( MIN_WINDOW )
 {}
 
 /* Get current window size, in datagrams */
 unsigned int Controller::window_size( void )
 {
+  unsigned int window_size = (unsigned int) cwnd_;
   if ( debug_ ) {
     cerr << "At time " << timestamp_ms()
-	 << " window size is " << window_size_ 
-   << " with fraction " << fraction_of_window_size_ << endl;
+	 << " window size is " << cwnd_ << endl;
   }
 
-  return window_size_;
+  return window_size;
 }
 
 void Controller::additive_increase() {
-  fraction_of_window_size_ += AI_CONST;
-  if (fraction_of_window_size_ >= window_size_) {
-    window_size_++;
-    fraction_of_window_size_ -= window_size_;
-  }
+  cwnd_ += AI_CONST / cwnd_;
 }
 
 void Controller::multiplicative_decrease() {
-  // If we have recently done a multiplicative decrease, don't do anything.
-  if (timestamp_ms() - timestamp_of_mult_decrease_ < MD_BUFFER_TIME){
-    return;
-  }
-
-  timestamp_of_mult_decrease_ = timestamp_ms();
-  fraction_of_window_size_ = 0;
-  window_size_ = max(
-      (unsigned int) MIN_WINDOW, 
-      (unsigned int) (window_size_ /  MD_CONST)
-  );
+  cwnd_= max(cwnd_ * MD_CONST, MIN_WINDOW);
 }
 
 /* A datagram was sent */

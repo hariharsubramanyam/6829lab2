@@ -13,6 +13,7 @@
 #define MD_BUFFER_TIME 200
 #define MD_RATIO_SCALER 1.5
 #define START_WINDOW 5
+#define AI_GROWTH 0.01
 
 using namespace std;
 
@@ -62,7 +63,7 @@ void Controller::datagram_was_sent( const uint64_t sequence_number,
 }
 
 void Controller::additive_increase() {
-  ai_ += 0.01;
+  ai_ += AI_GROWTH;
   cwnd_ += (1.0 * ai_) / cwnd_;
 }
 
