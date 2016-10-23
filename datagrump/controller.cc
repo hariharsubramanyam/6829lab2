@@ -4,8 +4,6 @@
 #include "timestamp.hh"
 
 #define EPOCH 100
-#define THROUGHPUT_EWMA 0.7
-#define RTT_EWMA 0.3
 #define TIMEOUT 90
 #define AI_CONST 1.0
 #define MD_CONST 2
@@ -20,18 +18,13 @@ using namespace std;
 /* Default constructor */
 Controller::Controller( const bool debug ) : 
   debug_(debug),
-  rtt_(),
-  throughput_(),
   num_packets_in_epoch_(0),
   start_of_last_epoch_(timestamp_ms()),
   cwnd_(START_WINDOW),
   timestamp_of_mult_decrease_(timestamp_ms()),
   ai_(AI_CONST),
   send_time_for_packet_()
-{
-  rtt_.set_alpha(RTT_EWMA);
-  throughput_.set_alpha(THROUGHPUT_EWMA);
-}
+{}
 
 /* Get current window size, in datagrams */
 unsigned int Controller::window_size( void )
@@ -131,51 +124,6 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   } 
 
   send_time_for_packet_.erase(sequence_number_acked);
-
-  rtt_.update(timestamp_ack_received - send_timestamp_acked);
-
-  /*
-  double ratio = 0;
-  if (rtt_.get() > 0) {
-    ratio = (1.0 * timestamp_ack_received - send_timestamp_acked) / rtt_.get();
-  }
-  if (ratio > 2) {
-    multiplicative_decrease(ratio * MD_CONST);
-    if (ratio > 4) {
-      cerr << "Outage" << endl;
-      cwnd_ = 1;
-    }
-  }
-
-  // Update RTT estimate.
-  if (ratio < 4) {
-    rtt_.update(timestamp_ack_received - send_timestamp_acked);
-  }
-  if (timestamp_ack_received - send_timestamp_acked < timeout_ms()) {
-    additive_increase();
-  }  else {
-    multiplicative_decrease();
-  }
-
-  // Indicate that another packet arrived during this epoch.
-  num_packets_in_epoch_++;
-
-  // Get current time.
-  uint64_t now = timestamp_ms();
-
-  // If the epoch is over...
-  if (now - start_of_last_epoch_ >= EPOCH) {
-
-    // Update the throughput estimate.
-    double to_packets_per_second = 10.0;
-    throughput_.update(to_packets_per_second * ((double)num_packets_in_epoch_) / ((double)EPOCH));
-    //cerr << "delay: " << rtt_.get() / 2 << " and throughput " << throughput_.get() << endl;
-
-    // Update the start of the epoch and indicate that no packets arrived during this epoch.
-    start_of_last_epoch_ = now;
-    num_packets_in_epoch_ = 0;
-  }
-  */
 
   if ( debug_ ) {
     cerr << "At time " << timestamp_ack_received

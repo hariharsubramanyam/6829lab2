@@ -10,35 +10,12 @@
 #include <deque>
 #include <unordered_map>
 
-/* Congestion controller interface */
-class Ewma {
-private:
-  double alpha_;
-  double value_;
-  bool got_first_val_;
-public:
-  Ewma() : alpha_(1), value_(0), got_first_val_(false) {};
-  void set_alpha(double alpha) {
-    alpha_ = alpha;
-  }
-  double get() {
-    return value_;
-  }
-  double update(double value) {
-    value_ = got_first_val_ ? alpha_ * value + (1 - alpha_) * value_ : value;
-    got_first_val_ = true;
-    return value_;
-  }
-};
-
 class Controller
 {
 private:
   bool debug_; /* Enables debugging output */
 
   /* Add member variables here */
-  Ewma rtt_;
-  Ewma throughput_;
   uint64_t num_packets_in_epoch_;
   uint64_t start_of_last_epoch_;
   double cwnd_;
