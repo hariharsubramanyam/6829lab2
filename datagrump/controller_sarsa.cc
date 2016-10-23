@@ -65,18 +65,24 @@ double Controller::compute_score(double throughput, double delay) {
   int d_throughput = discretize_throughput(throughput);
   int d_delay = discretize_delay(delay);
   double score = 0;
-  if (d_throughput == LOW && d_delay == HIGH) {
-    score = 0;
-  } else if (d_throughput == MED && d_delay == HIGH) {
-    score = 1;
-  } else if (d_throughput == HIGH && d_delay == HIGH) {
-    score = 3;
-  } else if (d_throughput == LOW && d_delay == LOW) {
+  if (d_throughput == LOW && d_delay == LOW) {
     score = 5;
+  } else if (d_throughput == LOW && d_delay == MED) {
+    score = 3;
+  } else if (d_throughput == LOW && d_delay == HIGH) {
+    score = 0;
   } else if (d_throughput == MED && d_delay == LOW) {
-    score = 20;
-  } else {
-    score = 30; 
+    score = 15;
+  } else if (d_throughput == MED && d_delay == MED) {
+    score = 10;
+  } else if (d_throughput == MED && d_delay == HIGH) {
+    score = 7;
+  } else if (d_throughput == HIGH && d_delay == LOW) {
+    score = 30;
+  } else if (d_throughput == HIGH && d_delay == MED) {
+    score = 18;
+  } else if (d_throughput == HIGH && d_delay == HIGH) {
+    score = 13;
   }
   score_.update(score);
   return score_.get();
@@ -85,7 +91,7 @@ double Controller::compute_score(double throughput, double delay) {
 
 void Controller::act(int action) {
   double relative = 1.0 * action / NUM_ACTIONS;
-  cwnd_ = 40 * relative;
+  cwnd_ = 15 * relative;
   cwnd_ = std::max(1.0, cwnd_);
 }
 
