@@ -7,6 +7,8 @@ You can see my detailed report in [`Report.pdf`](https://github.com/hariharsubra
 # Code
 I have separate code files for Exercises A, B, C, and D (and an additional set of files for my extension to Exercise D). Each exercise (and the extension to Exercise D) has a corresponding `sender_*.cc`, `controller_*.hh`, and `controller_*.cc`. To make the files for a chosen exercise replace the existing `sender.cc`, `controller.cc`, and `controller.cc` files, I have written a shell script called [`part.sh`](https://github.com/hariharsubramanyam/6829lab2/blob/master/datagrump/part.sh).
 
+The code is in this folder, and it is also in the [solutions folder](https://github.com/hariharsubramanyam/6829lab2/blob/master/solutions)
+
 ## Warmup Exercise A
 My Warmup Exercise A code is in
 * [`sender_fixed_window.cc`](https://github.com/hariharsubramanyam/6829lab2/blob/master/datagrump/sender_fixed_window.cc)
